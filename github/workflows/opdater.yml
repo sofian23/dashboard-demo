@@ -1,0 +1,27 @@
+name: Opdater dashboard-data
+
+on:
+  schedule:
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  opdater:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Hent data
+        run: python hent_data.py --eksempel
+      - name: Gem de nye tal
+        run: |
+          git config user.name "dashboard-bot"
+          git config user.email "dashboard-bot@users.noreply.github.com"
+          git add data/
+          git diff --cached --quiet || git commit -m "Opdaterer data $(date -u +%Y-%m-%d)"
+          git push
